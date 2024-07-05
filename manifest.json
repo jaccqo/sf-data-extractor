@@ -1,0 +1,17 @@
+{
+    "manifest_version": 3,
+    "name": "Personal sf Data Extractor",
+    "version": "1.0",
+    "description": "Extracts sf dialer data from web pages for personal use.",
+    "permissions": ["activeTab", "scripting"],
+    "background": {
+      "service_worker": "background.js"
+    },
+    "content_scripts": [
+      {
+        "matches": ["https://jbrands2023.lightning.force.com/*"],
+        "js": ["content.js"]
+      }
+    ]
+  }
+  
