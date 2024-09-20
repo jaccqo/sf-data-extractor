@@ -1,28 +1,5 @@
 console.log("Content script loaded and running.");
 
-let socket;
-
-function connectWebSocket() {
-    socket = new WebSocket('ws://localhost:5000/ws');
-
-    socket.addEventListener('open', () => {
-        console.log('WebSocket connection established.');
-    });
-
-    socket.addEventListener('close', () => {
-        console.log('WebSocket connection closed. Reconnecting in 3 seconds...');
-        setTimeout(connectWebSocket, 3000); // Reconnect after 3 seconds
-    });
-
-    socket.addEventListener('message', (event) => {
-        console.log('Message from server: ', event.data);
-    });
-
-    socket.addEventListener('error', (error) => {
-        console.error('WebSocket error:', error);
-    });
-}
-
 function checkForCall() {
     const callPanels = document.querySelectorAll('div.voiceConnectedPanel.voiceCallHandlerContainer');
     if (callPanels.length > 0) {
@@ -46,18 +23,14 @@ function checkForCall() {
 
         console.log("Call details:", callDetails);
 
-        if (socket.readyState === WebSocket.OPEN) {
-            socket.send(JSON.stringify({ status: 'call_in_progress', details: callDetails }));
-        } else {
-            console.error('WebSocket is not open. Cannot send message.');
-        }
+        chrome.runtime.sendMessage({ action: 'sendStatus', status: 'call_in_progress', details: callDetails }, response => {
+            console.log(response.status);
+        });
     } else {
         console.log("No call detected within the specific panel.");
-        if (socket.readyState === WebSocket.OPEN) {
-            socket.send(JSON.stringify({ status: 'no_call' }));
-        } else {
-            console.error('WebSocket is not open. Cannot send message.');
-        }
+        chrome.runtime.sendMessage({ action: 'sendStatus', status: 'no_call' }, response => {
+            console.log(response.status);
+        });
     }
 }
 
@@ -82,5 +55,3 @@ window.addEventListener('load', () => {
 
     observer.observe(document.body, { childList: true, subtree: true });
 });
-
-connectWebSocket();
